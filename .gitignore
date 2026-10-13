@@ -4,5 +4,3 @@ out
 .DS_Store
 tsconfig.tsbuildinfo
 
-# Scratch dir for scripts/build-tokens.mjs (app/tokens.generated.css IS committed)
-.tokens-build

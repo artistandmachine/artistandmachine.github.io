@@ -1,7 +1,10 @@
 "use client";
 
-import { useRef, useState, type MouseEvent } from "react";
+import { useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Photo from "./Photo";
+import { useMagnet } from "@/lib/useMagnet";
+import { getSpatial, spatialSupported } from "@/lib/spatial";
 
 /**
  * Shared treatment for every media slot in the design: desaturated by
@@ -28,8 +31,7 @@ export default function Media({
   loading,
   className = "",
   cursorFollow = false,
-  moveAmount = 6,
-  hoverScale = 1.02,
+  spatial = false,
 }: {
   src: string;
   video?: string;
@@ -41,32 +43,34 @@ export default function Media({
    * Ignored when `priority` is set (that already forces eager). */
   loading?: "eager" | "lazy";
   className?: string;
-  /** Opt in to the translate/scale-toward-cursor hover treatment.
-   * Off by default so most media slots stay static. */
+  /** Opt in to the drift/scale-toward-cursor hover treatment (see
+   * lib/useMagnet). Off by default so most media slots stay static. */
   cursorFollow?: boolean;
-  /** Max px the media drifts toward the cursor. Default 6. */
-  moveAmount?: number;
-  /** Scale applied while hovering. Default 1.02. */
-  hoverScale?: number;
+  /** Opt in to the depth "spatial scene" hover (lib/spatial.ts). Needs a
+   * `<name>-depth.webp` beside the image (npm run depth); without one, or on
+   * touch / reduced motion / video, the slot just behaves as before. */
+  spatial?: boolean;
 }) {
   const [videoFailed, setVideoFailed] = useState(false);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const [transform, setTransform] = useState("translate(0px, 0px) scale(1)");
+  const magnet = useMagnet<HTMLDivElement>(cursorFollow);
+  const stage = useRef<HTMLDivElement>(null);
+  const spatialOn = spatial && !(video && !videoFailed);
 
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (!cursorFollow) return;
-    const el = containerRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const xOffset = (e.clientX - rect.left) / rect.width - 0.5;
-    const yOffset = (e.clientY - rect.top) / rect.height - 0.5;
-    setTransform(
-      `translate(${xOffset * moveAmount}px, ${yOffset * moveAmount}px) scale(${hoverScale})`
-    );
-  };
-
-  const handleMouseLeave = () => {
-    if (cursorFollow) setTransform("translate(0px, 0px) scale(1)");
+  const handlers = {
+    onMouseEnter() {
+      if (!spatialOn || !stage.current || !spatialSupported()) return;
+      getSpatial()?.enter(stage.current, src);
+    },
+    onMouseMove(e: React.MouseEvent) {
+      magnet.handlers.onMouseMove(e);
+      if (!spatialOn) return;
+      const r = e.currentTarget.getBoundingClientRect();
+      getSpatial()?.move(((e.clientX - r.left) / r.width - 0.5) * 2, ((e.clientY - r.top) / r.height - 0.5) * 2);
+    },
+    onMouseLeave() {
+      magnet.handlers.onMouseLeave();
+      if (spatialOn) getSpatial()?.leave();
+    },
   };
   /*
   Disable the hover-color effect entirely (always desaturated, or always full color) — delete group-hover:opacity-0 (stays desaturated) or delete opacity-100/set it to opacity-0 (stays full color).
@@ -76,18 +80,16 @@ Scope it to specific sections only — since every section shares this one Media
 
   return (
     <div
-      ref={containerRef}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
+      ref={magnet.ref}
+      {...handlers}
       className={`group relative overflow-hidden bg-skeleton-fill ${className}`}
     >
-      <div
-        className={
-          cursorFollow
-            ? "absolute inset-0 transition-transform duration-300 ease-out will-change-transform"
-            : "absolute inset-0"
-        }
-        style={cursorFollow ? { transform } : undefined}
+      {/* The spatial canvas is mounted in here (over the photo) while
+          hovered, so it rides the magnet transform with it. */}
+      <motion.div
+        ref={stage}
+        className={cursorFollow ? "absolute inset-0 will-change-transform" : "absolute inset-0"}
+        style={cursorFollow ? magnet.style : undefined}
       >
         {video && !videoFailed ? (
           <video
@@ -103,7 +105,7 @@ Scope it to specific sections only — since every section shares this one Media
         ) : (
           <Photo src={src} alt={alt} fill sizes={sizes} priority={priority} loading={loading} className="object-cover" />
         )}
-      </div>
+      </motion.div>
       <div className="pointer-events-none absolute inset-0 bg-black mix-blend-saturation opacity-0 transition-opacity duration-700 ease-out group-hover:opacity-0 group-hover:duration-0" />
     </div>
   );

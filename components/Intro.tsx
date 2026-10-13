@@ -3,19 +3,21 @@
 import { useRef } from "react";
 import { motion, useScroll } from "framer-motion";
 import StickyLabel from "./StickyLabel";
+import { tune } from "@/lib/tune";
 
 export default function Intro({
   tagline,
   intro,
   subIntro,
   signoff,
-  designerFirstName,
+  signoffName,
 }: {
   tagline: string;
   intro: string;
   subIntro: string;
   signoff: string;
-  designerFirstName: string;
+  /** Name under the sign-off — set in data/site.json (studio.signoffName). */
+  signoffName: string;
 }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
@@ -41,14 +43,14 @@ export default function Intro({
             initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: tune.reveal.duration, ease: tune.reveal.ease }}
             id="headline-copy"
             className="flex w-full max-w-150 flex-col items-start gap-2 text-body text-on-surface">
             <h1 className="text-body font-normal text-on-surface">{tagline}</h1>
             <p>{intro}</p>
-            <p className="max-w-105">{subIntro}</p>
+            <p className="max-w-108">{subIntro}</p>
             <p>{signoff}</p>
-            <p>– {designerFirstName}</p>
+            <p>– {signoffName}</p>
           </motion.div>
           <div className="spacer-2 sm:spacer-3 w-full shrink-0" />
         </div>

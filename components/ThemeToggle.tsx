@@ -5,22 +5,23 @@ import { useEffect, useState } from "react";
 export const THEME_STORAGE_KEY = "theme";
 
 /** Inline script string, meant to run in <head> before hydration (see
- * layout.tsx) so the correct theme attribute is set before first paint —
- * without it, the page would flash light and then snap to a stored dark
- * preference a moment later. */
+ * layout.tsx) so the correct theme attribute is set before first paint.
+ * Dark is the default (layout.tsx renders data-theme="dark"); this only
+ * switches to light for visitors who chose it, so they don't flash dark
+ * and then snap light. */
 export const themeInitScript = `
   try {
     var t = localStorage.getItem("${THEME_STORAGE_KEY}");
-    if (t === "dark") document.documentElement.setAttribute("data-theme", "dark");
+    if (t === "light") document.documentElement.removeAttribute("data-theme");
   } catch (e) {}
 `;
 
-/** Manual light/dark toggle — never follows the OS/browser theme, only
- * ever this button (persisted to localStorage). Toggles the
+/** Manual light/dark toggle — dark by default, never follows the
+ * OS/browser theme, only ever this button (persisted to localStorage). Toggles the
  * [data-theme="dark"] attribute globals.css keys its dark token values
  * off of. */
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
 
   useEffect(() => {
     const current = document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";

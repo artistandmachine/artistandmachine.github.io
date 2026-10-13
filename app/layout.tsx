@@ -5,15 +5,15 @@ import SmoothScroll from "@/components/SmoothScroll";
 import { themeInitScript } from "@/components/ThemeToggle";
 import "./globals.css";
 
-// Satoshi — the studio's single type family per the Figma source of
-// truth, used for both UI copy and editorial headlines.
+// Satoshi, the studio's single type family, used for both UI copy and
+// editorial headlines (mapped to font-sans in app/theme.css).
 const satoshi = localFont({
   src: [
     { path: "../public/fonts/Satoshi-Light.woff2", weight: "300", style: "normal" },
     { path: "../public/fonts/Satoshi-Regular.woff2", weight: "400", style: "normal" },
     { path: "../public/fonts/Satoshi-Medium.woff2", weight: "500", style: "normal" },
   ],
-  variable: "--font-sans",
+  variable: "--font-satoshi",
   display: "swap",
 });
 
@@ -71,11 +71,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={satoshi.variable}>
+    // Dark by default; themeInitScript removes data-theme before paint for
+    // visitors who picked light, so the attribute can differ from the
+    // server HTML on purpose (hence suppressHydrationWarning, scoped to
+    // this element's attributes only).
+    <html lang="en" className={satoshi.variable} data-theme="dark" suppressHydrationWarning>
       <body>
-        {/* Sets [data-theme] before first paint (Next's own
-            beforeInteractive injection point, ahead of hydration) so a
-            stored dark preference doesn't flash light then snap dark. */}
+        {/* Applies a stored light preference before first paint (Next's
+            own beforeInteractive injection point, ahead of hydration) so it
+            doesn't flash dark then snap light. */}
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
         </Script>

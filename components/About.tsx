@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useScroll } from "framer-motion";
 import Media from "./Media";
 import StickyLabel from "./StickyLabel";
+import { InstagramIcon, LinkedInIcon } from "./Logos";
 import { hideOffset, useFillerProgress } from "@/lib/useAboutEndProgress";
 
 // StickyLabel's own `top-22.5` offset (22.5 * 4 = 90px) — the label
@@ -122,21 +123,48 @@ export default function About({
           {/* blockCapabilities: sticky "Capabilities" label on the left,
               capability text column, capability image column */}
           <div id="about-capabilities" className="flex w-full flex-col lg:flex-row items-start justify-end">
-            <div className="flex min-w-0 flex-1 shrink-0 flex-col items-start sm:items-center self-stretch">
-              <StickyLabel as="h3" className="w-full text-left sm:text-center">Capabilities</StickyLabel>
+            <div className="flex min-w-0 flex-1 shrink-0 flex-col items-start sm:items-end lg:items-center self-stretch">
+              {/* Below lg: this wrapper's own height is the label's sticky
+                  "room" — it pins under the nav for that whole scroll
+                  distance, then unsticks with exactly 24px (the release
+                  buffer added back in the tile column below) left before
+                  the first tile. At lg, lg:h-full lets it fill the
+                  self-stretch height matched to the sibling column. */}
+              <div className="relative w-full h-2 sm:h-[calc(25vh-24px)] lg:h-full">
+                <StickyLabel as="h3" className="w-full text-left sm:text-right lg:text-center">Capabilities</StickyLabel>
+              </div>
             </div>
-            <div className="min-w-0 max-w-full lg:max-w-125 flex-1 w-full">
+            {/* sm/md: one interleaved column — each capability's image
+                directly above its label, image width 100%/70% (sm/md) */}
+            <div className="flex w-full flex-1 flex-col items-end lg:hidden">
+              <div className="h-6 w-full shrink-0" />
+              {capabilities.map((c, i) => (
+                <div key={c} className="flex w-full flex-col items-end gap-6 pb-12 last:pb-0">
+                  <Media
+                    src={images[i]}
+                    sizes="(min-width: 768px) 70vw, 100vw"
+                    className="aspect-400/225 w-full md:w-[70%]"
+                    cursorFollow
+                  />
+                  <p className="text-right text-nowrap text-body text-on-surface pr-4">{c}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* lg+: capability labels and images as two separate columns,
+                aligned row-for-row via matching aspect-ratio heights */}
+            <div className="hidden min-w-0 max-w-125 flex-1 lg:block">
               <div className="spacer-2 sm:spacer-3 w-full shrink-0" />
               {capabilities.map((c) => (
                 <div
                   key={c}
                   className="flex aspect-400/225 w-full flex-col items-end justify-center pr-4 lg:pr-20"
                 >
-                  <p className="text-right text-body text-on-surface">{c}</p>
+                  <p className="text-right text-nowrap text-body text-on-surface">{c}</p>
                 </div>
               ))}
             </div>
-            <div className="min-w-0 max-w-full lg:max-w-125 flex-1 w-full">
+            <div className="hidden min-w-0 max-w-125 flex-1 lg:block">
               <div className="spacer-2 sm:spacer-3 w-full shrink-0" />
               {images.map((src) => (
                 <Media
@@ -152,13 +180,22 @@ export default function About({
 
           {/* blockTeam: sticky "Designer" label on the left, designer
               photo/name/social links on the right */}
-          <div id="about-designer" className="flex w-full flex-col sm:flex-row items-start justify-between px-0 sm:px-6 md:px-12 lg:px-32">
-            <div ref={designerColumnRef} className="flex flex-1 flex-col items-start sm:items-center self-stretch">
+          <div id="about-designer" className="flex w-full flex-col lg:flex-row items-start justify-between px-0 sm:px-6 md:px-12 lg:px-32">
+            <div ref={designerColumnRef} className="flex flex-1 flex-col items-start lg:items-center self-stretch">
               <div className="h-[25vh] sm:h-[50vh] w-full shrink-0" />
-              <StickyLabel as="h3" className="w-full text-left sm:text-center">Designer</StickyLabel>
-              <div className="hidden sm:block h-[150vh] w-full shrink-0" />
+              {/* This wrapper's own height is the label's sticky "room" — it
+                  pins under the nav for that whole scroll distance. Below lg
+                  it unsticks with exactly 24px (the release buffer on the
+                  image column below) left before the photo; at lg the height
+                  is an explicit 150vh (previously a separate spacer sibling
+                  fed lg:flex-1 here, but the flex row's height is already
+                  set by that same spacer, leaving flex-1 nothing to grow
+                  into — the label never got any sticky room). */}
+              <div className="relative w-full h-2 sm:h-[calc(25vh-24px)] lg:h-[150vh]">
+                <StickyLabel as="h3" className="w-full text-left lg:text-center">Designer</StickyLabel>
+              </div>
             </div>
-            <div className="flex min-w-0 max-w-full lg:max-w-125 flex-1 flex-col items-end justify-end gap-3 self-stretch w-full pt-8 sm:pt-0">
+            <div className="flex min-w-0 max-w-full lg:max-w-125 flex-1 flex-col items-end justify-end gap-3 self-stretch w-full pt-6 lg:pt-0">
               <Media
                 src={designer.photo}
                 alt={designer.name}
@@ -175,18 +212,18 @@ export default function About({
                   target="_blank"
                   rel="noreferrer"
                   aria-label="Instagram"
-                  className="transition-opacity duration-200 ease-out hover:opacity-60"
+                  className="transition-opacity duration-100 ease-out hover:text-accent"
                 >
-                  <img src="/brand/ic-instagram.svg" alt="" className="h-6 w-6 dark:invert" />
+                  <InstagramIcon className="h-6 w-6" />
                 </a>
                 <a
                   href={designer.linkedin}
                   target="_blank"
                   rel="noreferrer"
                   aria-label="LinkedIn"
-                  className="transition-opacity duration-200 ease-out hover:opacity-60"
+                  className="transition-opacity duration-100 ease-out hover:text-accent"
                 >
-                  <img src="/brand/ic-linkedin.svg" alt="" className="h-6 w-6 dark:invert" />
+                  <LinkedInIcon className="h-6 w-6" />
                 </a>
               </div>
             </div>

@@ -21,10 +21,15 @@ Then open http://localhost:3000.
 
 Every component uses **Tailwind CSS utility classes** for layout, spacing, type, and color. Open any `.tsx` file and you'll see classes like `flex`, `gap-4`, `px-6`, `text-lg`, `md:px-10`, etc.
 
-**Quick edits:**
-- Change a color anywhere? Edit the `extend.colors` in `tailwind.config.ts` (e.g., change `accent: "#b5502c"` to your new color).
-- Adjust spacing or type sizes? Same place in the config, or just change class names in the component.
-- Responsive breakpoints? Use `md:`, `lg:`, etc. prefixes (already built into Tailwind).
+**Where to change things** (three files, no build step):
+
+| Change | File |
+|---|---|
+| Words, projects, links, image paths | `data/site.json` |
+| Colours (light + dark), font, text styles, image ratios | `app/theme.css` |
+| Motion: hero rotation, spatial hover, magnet, footer see-saw, scroll feel | `lib/tune.ts` |
+
+Responsive breakpoints? Use `md:`, `lg:`, etc. prefixes on a component's classes.
 
 **How it works:** Tailwind scans your component files for class names, generates only the CSS you use, and injects it into `globals.css`. No CSS files to maintain — just pick classes and go.
 
@@ -39,7 +44,7 @@ public/
 ├── images/
 │   ├── hero/       hero-1.png, hero-2.png, hero-3.png
 │   ├── about/      bion-headshot.png, capability-<slug>.jpg (one per capability)
-│   └── projects/   <project-id>.jpg (one per entry in data/projects.json)
+│   └── projects/   <project-id>.jpg (one per entry in data/site.json)
 ├── videos/
 │   ├── hero/       optional — same naming idea as images/hero if you add motion to the hero
 │   ├── about/       optional — same naming idea as images/about
@@ -49,9 +54,9 @@ public/
 
 **To update an image or video:** just overwrite the file at its existing
 path with the same filename. The dev server hot-reloads; nothing in
-`data/projects.json` needs to change.
+`data/site.json` needs to change.
 
-**Placeholders:** every image slot referenced in `data/projects.json`
+**Placeholders:** every image slot referenced in `data/site.json`
 currently has a real file at its path — real photos where Bion supplied
 them, and an auto-generated gray "PLACEHOLDER — replace `<filename>` to
 update" swatch everywhere real art hasn't landed yet (currently all 9
@@ -59,29 +64,22 @@ project thumbnails, plus 2 of the 8 About capability images). Drop a real
 photo in with the exact same filename to replace a placeholder.
 
 **Adding a new project:**
-1. Open `data/projects.json`, add a new object to the `projects` array (copy an existing one as a template).
+1. Open `data/site.json`, add a new object to the `projects` array (copy an existing one as a template).
 2. Drop the project image into `public/images/projects/` named to match the `image` field (e.g. `<id>.jpg`). If you don't have the photo yet, leave the field pointing at that filename anyway and drop in any placeholder image — the site will just show it desaturated until you swap it.
 3. Optional — video instead of / in addition to a still: add a `"video"` field (e.g. `"/videos/projects/<id>.mp4"`) and drop the matching file into `public/videos/projects/`. The `image` still renders as the poster frame and as the automatic fallback if the video file is missing or fails to load, so always keep the `image` field set even when a video is present.
 4. If you don't have final copy yet, write your notes in `rawNotes` and set `needsDescription: true` — the row will show a "pending" placeholder instead of guessing. Hand the notes to Claude to polish per `content/STYLE_GUIDE.md`.
 5. Save. The dev server hot-reloads.
 
 **Hero / About images:**
-- Hero: drop images into `public/images/hero/` and list their paths in `data/projects.json` → `studio.heroImages`. The hero section's height is `images.length * 100vh`, so adding more images makes the pinned scroll sequence longer automatically.
+- Hero: drop images into `public/images/hero/` and list their paths in `data/site.json` → `studio.heroImages`. The hero section's height is `images.length * 100vh`, so adding more images makes the pinned scroll sequence longer automatically.
 - About: same idea, `public/images/about/` + `studio.capabilityImages`. One image per capability, in the same order as `studio.capabilities` — filenames follow `capability-<slug>.jpg` where `<slug>` is the capability name lowercased/hyphenated (e.g. "Marketing & Growth Support" → `capability-marketing-growth-support.jpg`).
 - Either slot also accepts a `video` the same way projects do — swap the string in `heroImages`/`capabilityImages` for an object `{ "image": "...", "video": "..." }` and thread it through `Hero`/`About` the same way `ProjectTile` does (not wired up by default since no hero/about video exists yet — ask Claude to wire it if you add one).
 
 **Image prep:** `next.config.js` sets `images.unoptimized: true` (required for static export), so there's no server-side resizing/compression — pre-size and compress source photos yourself before dropping them in. Roughly 1600px on the long edge, JPEG quality ~80, keeps things fast.
 
-## Design in Figma, iterate in code
+## Iterate in code
 
-The workflow for next phase:
-1. Design in Figma (colors, spacing, typography, layout).
-2. Extract design tokens from Figma (via Figma MCP in Claude).
-3. Update `tailwind.config.ts` with your palette and spacing scale.
-4. Run `npm run dev`, tweak classes in components, see changes live.
-5. Repeat until it matches your Figma design.
-
-Tailwind makes this fast — you're just changing class names and seeing the result instantly, not writing CSS from scratch.
+Build and refine in the browser: `npm run dev`, change a knob in one of the three files above, see it live. Figma is optional reference, not the source of truth.
 
 ## Things to verify once you're running it locally
 

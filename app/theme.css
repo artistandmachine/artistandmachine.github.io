@@ -1,0 +1,104 @@
+/* ============================================================
+   THEME: every visual knob for the site, in one file.
+   Colours (light + dark), fonts, text styles, image ratios.
+   Save and the page hot-reloads; there's no build step.
+
+   Copy lives in data/site.json. Motion numbers live in lib/tune.ts.
+   ============================================================ */
+
+/* ---- 1. Palette ---------------------------------------------- */
+:root {
+  --brand-primary: #7c6699; /* signature accent hue */
+  --brand-secondary: #b6b2af; /* supporting neutral tone */
+  --brand-tertiary: #70665c; /* supporting neutral tone */
+}
+
+/* ---- 2. Light + dark -----------------------------------------
+   Light is the default. The site ships dark (layout.tsx renders
+   data-theme="dark" on <html>); ThemeToggle removes it for light.
+   It never follows the OS setting.
+   Use as Tailwind classes: bg-surface, text-on-surface, bg-bar, ... */
+@theme static {
+  --color-surface: var(--color-white); /* page background */
+  --color-on-surface: var(--color-black); /* text and icons */
+  --color-surface-variant: var(--brand-secondary); /* outer letterbox behind the content column */
+  --color-on-surface-variant: var(--brand-tertiary); /* muted text, e.g. footer divider */
+  --color-primary-container: var(--color-black); /* footer and other dark bands */
+  --color-on-primary-container: var(--color-white); /* text on those bands */
+  --color-border: #70665c4d; /* section progress bar track */
+  --color-on-border: var(--color-black); /* section progress bar fill */
+  --color-bar: var(--color-black); /* nav page-load bar track */
+  --color-on-bar: var(--brand-tertiary); /* nav page-load bar fill */
+  --color-accent: var(--brand-primary); /* links, highlights */
+  --color-skeleton-fill: var(--color-neutral-100); /* media placeholder (same in both themes) */
+}
+
+@layer base {
+  :root[data-theme="dark"] {
+    --color-surface: #1a1a1a;
+    --color-on-surface: var(--color-white);
+    --color-surface-variant: var(--color-neutral-800);
+    --color-on-surface-variant: #a89f91; /* 5.8:1 on #1a1a1a (AA) */
+    --color-border: var(--brand-tertiary);
+    --color-on-border: var(--color-white);
+    --color-bar: var(--brand-tertiary);
+    --color-on-bar: var(--color-white);
+    --color-accent: #b0a3c2; /* brand-primary is only 3.5:1 on dark; this is 7.4:1 */
+  }
+}
+
+/* ---- 3. Font -------------------------------------------------
+   Satoshi is loaded in app/layout.tsx (next/font/local). */
+@theme {
+  --font-sans: var(--font-satoshi), system-ui, sans-serif;
+}
+
+/* ---- 4. Text styles ------------------------------------------
+   Every typographic treatment on the site. Typography only: colour,
+   whitespace and alignment stay on each component. */
+@layer components {
+  /* Small uppercase pinned labels: "Work", "About", "2026", "Capabilities" */
+  .text-label {
+    @apply text-sm font-normal uppercase leading-4 tracking-wider;
+  }
+  /* Paragraph copy: Headline intro lines, About capability list, designer name */
+  .text-body {
+    @apply text-base leading-5 tracking-normal;
+  }
+  /* Project tile title (Work section) */
+  .text-project-title {
+    @apply text-sm font-normal leading-4 tracking-normal;
+  }
+  /* Project tile description (Work section) */
+  .text-project-description {
+    @apply text-sm font-normal leading-4 tracking-normal;
+  }
+  /* Project tile capability/location/link stack (Work section) */
+  .text-project-meta {
+    @apply text-sm font-normal leading-4 tracking-normal;
+  }
+  /* Nav header links: "Work", "About" */
+  .text-nav-link {
+    @apply text-sm font-normal leading-3.5 tracking-widest;
+  }
+  /* Footer links (email, etc.) */
+  .text-footer-link {
+    @apply text-sm font-light leading-[1.2] tracking-widest;
+  }
+}
+
+/* ---- 5. Image ratios -----------------------------------------
+   The three fixed shapes every media slot snaps to. Put one on a
+   <Media> wrapper; width stays fluid, height follows. */
+@utility img-presentation {
+  aspect-ratio: 16 / 9; /* 1920x1080: hero / presentation stills */
+  width: 100%;
+}
+@utility img-social {
+  aspect-ratio: 4 / 5; /* 1080x1350: portrait social crop */
+  width: 100%;
+}
+@utility img-tile {
+  aspect-ratio: 5 / 4; /* 1000x800: Work tiles */
+  width: 100%;
+}

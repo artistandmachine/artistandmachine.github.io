@@ -5,12 +5,13 @@ import { motion, useScroll } from "framer-motion";
 import { getLenis } from "./SmoothScroll";
 import { hideOffset, useFillerProgress } from "@/lib/useAboutEndProgress";
 import ThemeToggle from "./ThemeToggle";
+import { tune } from "@/lib/tune";
 
 // Matches the 90px sticky-nav buffer sections use to decide when they've
 // "started" (see useActiveSection and the offset on each section's own
 // scroll-progress tracker), so a nav-link click lands a section exactly
 // where it's considered active instead of tucking it under the nav.
-const SECTION_SCROLL_BUFFER = 80;
+const SECTION_SCROLL_BUFFER = tune.scroll.sectionBuffer;
 
 const NAV_SECTION_IDS = ["#s-work", "#s-about"];
 

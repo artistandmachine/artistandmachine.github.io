@@ -1,10 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import Media from "./Media";
+import { useMagnet } from "@/lib/useMagnet";
+import { getSpatial, SPATIAL_HERO, SPATIAL_HERO_SLIDES, spatialSupported } from "@/lib/spatial";
+import { tune } from "@/lib/tune";
 
-const AUTO_ROTATE_INTERVAL = 4000;
-const RESUME_DELAY_AFTER_CLICK = 3000;
+const AUTO_ROTATE_INTERVAL = tune.hero.rotateMs;
+const RESUME_DELAY_AFTER_CLICK = tune.hero.resumeAfterClickMs;
 
 export default function Hero({ images }: { images: string[] }) {
   const [active, setActive] = useState(0);
@@ -16,25 +20,38 @@ export default function Hero({ images }: { images: string[] }) {
   // Handled here rather than via Media's `cursorFollow` because the
   // carousel's click-zone buttons sit above the slides and would
   // swallow the pointer events Media needs.
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [followTransform, setFollowTransform] = useState(
-    "translate(0px, 0px) scale(1)"
-  );
+  const magnet = useMagnet<HTMLDivElement>();
 
-  function handleFollowMove(e: React.MouseEvent) {
-    const el = carouselRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const xOffset = (e.clientX - rect.left) / rect.width - 0.5;
-    const yOffset = (e.clientY - rect.top) / rect.height - 0.5;
-    setFollowTransform(
-      `translate(${xOffset * 6}px, ${yOffset * 6}px) scale(1.02)`
-    );
+  // Spatial-scene hover (lib/spatial.ts), driven from here for the same
+  // reason as the magnet. The canvas lives in the active slide; when the
+  // carousel rotates under the cursor it hops to the new slide mid-spring.
+  const slideRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const hovering = useRef(false);
+  function spatialEnter(index: number) {
+    const el = slideRefs.current[index];
+    if (!el || !spatialSupported()) return;
+    getSpatial()?.enter(el, images[index], SPATIAL_HERO_SLIDES[index] ?? SPATIAL_HERO);
   }
-
-  function handleFollowLeave() {
-    setFollowTransform("translate(0px, 0px) scale(1)");
-  }
+  useEffect(() => {
+    if (hovering.current) spatialEnter(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [active]);
+  const handlers = {
+    onMouseEnter() {
+      hovering.current = true;
+      spatialEnter(active);
+    },
+    onMouseMove(e: React.MouseEvent) {
+      magnet.handlers.onMouseMove(e);
+      const r = e.currentTarget.getBoundingClientRect();
+      getSpatial()?.move(((e.clientX - r.left) / r.width - 0.5) * 2, ((e.clientY - r.top) / r.height - 0.5) * 2);
+    },
+    onMouseLeave() {
+      hovering.current = false;
+      magnet.handlers.onMouseLeave();
+      getSpatial()?.leave();
+    },
+  };
 
   useEffect(() => {
     if (images.length <= 1 || !autoRotate) return;
@@ -83,12 +100,11 @@ export default function Hero({ images }: { images: string[] }) {
     <section id="s-hero" className="flex w-full flex-col items-center overflow-clip px-3 md:px-8 lg:px-12">
       <div
         id="hero-carousel"
-        ref={carouselRef}
+        ref={magnet.ref}
         className="relative aspect-1104/621 w-full"
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        onMouseMove={handleFollowMove}
-        onMouseLeave={handleFollowLeave}
+        {...handlers}
       >
         {images.map((src, i) => (
           <div
@@ -98,9 +114,14 @@ export default function Hero({ images }: { images: string[] }) {
             }`}
             style={{ opacity: i === active ? 1 : 0 }}
           >
-            <div
-              className="h-full w-full transition-transform duration-300 ease-out will-change-transform"
-              style={{ transform: i === active ? followTransform : undefined }}
+            {/* All slides share one spring, so the incoming slide
+                crossfades in already where the outgoing one sat. */}
+            <motion.div
+              ref={(el) => {
+                slideRefs.current[i] = el;
+              }}
+              className="relative h-full w-full will-change-transform"
+              style={magnet.style}
             >
               <Media
                 src={src}
@@ -109,7 +130,7 @@ export default function Hero({ images }: { images: string[] }) {
                 loading={i === 0 ? undefined : "eager"}
                 className="h-full w-full"
               />
-            </div>
+            </motion.div>
           </div>
         ))}
 

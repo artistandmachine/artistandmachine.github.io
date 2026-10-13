@@ -1,9 +1,8 @@
 @import "tailwindcss";
-/* Semantic + brand color tokens, compiled from tokens/*.json (see the THEME
-   note below). Kept adjacent to the Tailwind import so both @import rules
-   sit at the top of the file, as CSS requires. */
-@import "./tokens.generated.css";
-@config "../tailwind.config.js";
+@import "./theme.css";
+
+/* Plumbing only. The knobs live in app/theme.css (look), data/site.json
+   (copy) and lib/tune.ts (motion). */
 
 /* Redefines Tailwind's `dark:` variant to key off a manually-set
    [data-theme="dark"] attribute instead of the OS/browser's
@@ -11,26 +10,8 @@
    that ever sets it, so the theme never silently follows the browser. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
-/* ============================================================
-   THEME — every color used anywhere on the site is a semantic token
-   (what the color is FOR, e.g. "surface", not what it IS, e.g.
-   "white"). The token VALUES live in `tokens/*.json`, which mirror the
-   Figma "Primitives" and "Theme" variable collections 1:1, and are
-   compiled to `tokens.generated.css` by `scripts/build-tokens.mjs`
-   (`npm run tokens`, also run automatically on predev / prebuild).
-   Edit the JSON (or re-export it from Figma) — never the generated CSS.
-
-   The generated file defines light values on :root (the default) and
-   dark values on :root[data-theme="dark"], which is the ONLY thing
-   that ever overrides them — see ThemeToggle.tsx. There's no
-   `@media (prefers-color-scheme: dark)` block by design: the theme
-   never switches on its own, only via the toggle.
-
-   `tailwind.config.js` just aliases `bg-<token>` / `text-<token>` /
-   etc. to `var(--color-<token>)`.
-   ============================================================ */
-
 body {
+  position: relative;
   background-color: var(--color-surface);
   color: var(--color-on-surface);
 }
@@ -71,62 +52,4 @@ body {
 .spacer-6 {
   height: 150vh;
   width: 100%;
-}
-
-/* Image sizes — the three fixed aspect ratios every media slot on the
-   site snaps to. Drop one on a `<Media>` wrapper (or any element) in
-   place of a raw `aspect-* w-full` pair. The wrapper stays fluid width;
-   height follows from the ratio.
-     .img-presentation — 1920×1080, 16:9  (hero / presentation stills)
-     .img-social       — 1080×1350, 4:5   (portrait social crop)
-     .img-tile         — 1000×800,  5:4   (Work section project tiles) */
-@utility img-presentation {
-  aspect-ratio: 16 / 9;
-  width: 100%;
-}
-
-@utility img-social {
-  aspect-ratio: 4 / 5;
-  width: 100%;
-}
-
-@utility img-tile {
-  aspect-ratio: 5 / 4;
-  width: 100%;
-}
-
-/* Text styles — every typographic treatment used on the site, named and
-   centralized here so changing a font-size/weight/spacing updates every
-   usage at once instead of hunting down repeated Tailwind utility
-   strings across components. Color, whitespace, and alignment stay in
-   each component's own className — these classes are typography only. */
-@layer components {
-  /* Small uppercase pinned labels: "Work", "About", "2026", "Capabilities" */
-  .text-label {
-    @apply text-sm font-normal uppercase leading-4 tracking-wider;
-  }
-  /* Paragraph copy: Headline intro lines, About capability list, designer name */
-  .text-body {
-    @apply text-base leading-5 tracking-normal;
-  }
-  /* Project tile title (Work section) */
-  .text-project-title {
-    @apply text-sm font-normal leading-4 tracking-normal;
-  }
-  /* Project tile description (Work section) */
-  .text-project-description {
-    @apply text-sm font-normal leading-4 tracking-normal;
-  }
-  /* Project tile capability/location/link stack (Work section) */
-  .text-project-meta {
-    @apply text-sm font-normal leading-4 tracking-normal;
-  }
-  /* Nav header links: "Work", "About" */
-  .text-nav-link {
-    @apply text-sm font-normal leading-3.5 tracking-widest;
-  }
-  /* Footer links (email, etc.) */
-  .text-footer-link {
-    @apply text-sm font-light leading-[1.2] tracking-widest;
-  }
 }

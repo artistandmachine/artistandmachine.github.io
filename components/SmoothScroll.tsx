@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Lenis from "lenis";
+import { tune } from "@/lib/tune";
 
 let lenisInstance: Lenis | null = null;
 
@@ -21,7 +22,7 @@ export function getLenis() {
 export default function SmoothScroll() {
   useEffect(() => {
     const lenis = new Lenis({
-      duration: 0.3,
+      duration: tune.scroll.smoothing,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
     });
     lenisInstance = lenis;

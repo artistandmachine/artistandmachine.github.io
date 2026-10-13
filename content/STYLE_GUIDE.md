@@ -28,7 +28,7 @@ Roughly: `[What we built] for [Client], [verb-ing] [the specific problem it solv
 
 ## Workflow
 
-1. Add a new entry to `data/projects.json` with title, year, category, location, client link, and image.
+1. Add a new entry to `data/site.json` with title, year, category, location, client link, and image.
 2. Write whatever you'd actually say about the project in `rawNotes` — bullet points, half-sentences, whatever.
 3. Set `needsDescription: true`.
 4. Hand it to Claude: "polish the description for [project id]." Claude rewrites `rawNotes` into `description` using this guide, flips `needsDescription` to `false`.

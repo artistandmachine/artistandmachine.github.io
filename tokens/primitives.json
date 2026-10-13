@@ -1,7 +1,0 @@
-{
-  "brand": {
-    "primary": { "$value": "#7c6699", "$type": "color", "$description": "signature accent hue" },
-    "secondary": { "$value": "#b6b2af", "$type": "color", "$description": "supporting neutral tone" },
-    "tertiary": { "$value": "#70665c", "$type": "color", "$description": "supporting neutral tone" }
-  }
-}

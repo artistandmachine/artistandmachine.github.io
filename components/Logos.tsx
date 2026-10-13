@@ -1,10 +1,34 @@
+"use client";
+
+import { useState } from "react";
+
 /**
- * Inline (not <img>-sourced) versions of brand SVGs that need to take an
- * arbitrary CSS color per theme. Paths use fill="currentColor" so color
- * is set the normal way (a `text-*` class or `color` style) instead of
- * via a CSS `invert` filter, which can only ever produce a color's RGB
- * complement — fine for black↔white, useless for anything else.
+ * Every brand/social mark used across the site lives here — inline SVGs
+ * that need to take an arbitrary CSS color per theme (paths use
+ * fill="currentColor" so color is set the normal way, a `text-*` class
+ * or `color` style, instead of via a CSS `invert` filter, which can
+ * only ever produce a color's RGB complement) alongside the generic
+ * `Logo` wrapper for referencing a client/partner logo file from the
+ * public folder.
  */
+
+export function Mark({ className = "" }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 222.252 44"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      role="img"
+      aria-label="Artist & Machine"
+    >
+      <path d="M0 44H76.9308L104.406 0H27.4754L0 44Z" fill="currentColor" />
+      <path d="M211.559 44H134.629L107.153 0H184.084L211.559 44Z" fill="currentColor" />
+      <path d="M215.62 44V41.5148H214.559V40.7H217.713V41.5148H216.647V44H215.62Z" fill="currentColor" />
+      <path d="M220.622 44H219.703L218.986 41.7287V44H218.063V40.7H219.566L220.17 42.7528L220.764 40.7H222.252V44H221.329V41.715L220.622 44Z" fill="currentColor" />
+    </svg>
+  );
+}
 
 export function Wordmark({ className = "" }: { className?: string }) {
   return (
@@ -52,5 +76,43 @@ export function LinkedInIcon({ className = "" }: { className?: string }) {
       <path d="M8.29974 6.51846C8.29974 6.08276 7.94679 5.72928 7.51115 5.72915C7.07537 5.72915 6.72183 6.08268 6.72183 6.51846C6.72197 6.95412 7.07546 7.30702 7.51115 7.30702C7.94671 7.30688 8.29959 6.95404 8.29974 6.51846ZM9.07394 6.51846C9.07378 7.38162 8.3743 8.08111 7.51115 8.08119C6.64788 8.08119 5.94778 7.3817 5.94764 6.51846C5.94764 5.6551 6.64779 4.95495 7.51115 4.95495C8.37437 4.95509 9.07394 5.65519 9.07394 6.51846Z" fill="currentColor" />
       <path d="M7.12387 18.3484V9.44586C7.12387 9.2321 7.29718 9.05876 7.51096 9.05876C7.72475 9.05876 7.89809 9.2321 7.89809 9.44586V18.3484C7.89809 18.5621 7.72475 18.7355 7.51096 18.7355C7.29718 18.7355 7.12387 18.5621 7.12387 18.3484ZM16.9684 18.3484V12.805C16.9683 12.4148 16.8916 12.0284 16.7423 11.6679C16.5929 11.3073 16.3735 10.9792 16.0974 10.7032C15.8214 10.4273 15.4939 10.2084 15.1335 10.059C14.7728 9.90968 14.386 9.83288 13.9956 9.83296C13.2074 9.83296 12.4512 10.1459 11.8938 10.7032C11.3364 11.2606 11.0237 12.0168 11.0236 12.805V18.3484C11.0236 18.5621 10.8502 18.7353 10.6365 18.7355C10.4227 18.7355 10.2494 18.5621 10.2494 18.3484V9.44586C10.2494 9.2321 10.4227 9.05876 10.6365 9.05876C10.8502 9.05892 11.0236 9.23218 11.0236 9.44586V10.5255C11.1227 10.3963 11.23 10.2722 11.3464 10.1558C12.049 9.45329 13.002 9.05876 13.9956 9.05876L14.1801 9.06333C14.6091 9.08439 15.0321 9.17915 15.4298 9.34382C15.8842 9.53203 16.2969 9.8081 16.6448 10.1558C16.9928 10.5037 17.2692 10.917 17.4575 11.3715C17.6458 11.826 17.7425 12.3131 17.7426 12.805V18.3484C17.7426 18.5621 17.5692 18.7355 17.3555 18.7355C17.1417 18.7354 16.9684 18.5621 16.9684 18.3484Z" fill="currentColor" />
     </svg>
+  );
+}
+
+/**
+ * Plain <img> wrapper for client/partner logo SVGs referenced by path
+ * (as opposed to the inline marks above). Unmounts itself on error
+ * instead of showing the browser's broken-image glyph, so a project's
+ * clientLogo/partnerLogo path can be set in site.json ahead of the
+ * actual file — it just renders nothing until a real SVG is dropped in
+ * at that path, no code change needed.
+ *
+ * `object-contain` is baked in so callers only ever need to hand it a
+ * fixed-size box (a definite height + width) — logos vary wildly in
+ * aspect ratio, and without a reserved box each one shifts the page as
+ * it decodes mid-scroll. Always give the className a concrete height.
+ */
+export function Logo({
+  src,
+  alt = "",
+  className = "",
+}: {
+  src: string;
+  alt?: string;
+  className?: string;
+}) {
+  const [failed, setFailed] = useState(false);
+
+  if (failed) return null;
+
+  return (
+    <img
+      src={src}
+      alt={alt}
+      loading="lazy"
+      decoding="async"
+      className={`block object-contain dark:invert ${className}`}
+      onError={() => setFailed(true)}
+    />
   );
 }

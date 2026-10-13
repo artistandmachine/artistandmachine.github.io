@@ -4,12 +4,13 @@ import Hero from "@/components/Hero";
 import Intro from "@/components/Intro";
 import WorkProjects from "@/components/WorkProjects";
 import About from "@/components/About";
-import Footer from "@/components/FooterSeesaw";
+import Footer from "@/components/Footer";
 import ProgressMask from "@/components/ProgressMask";
-import data from "@/data/projects.json";
+import data from "@/data/site.json";
 
 export default function Home() {
   const { studio, projects } = data;
+  const visibleProjects = projects.filter((p) => !("hidden" in p && p.hidden));
 
   return (
     <main id="main-home" className="relative flex w-full flex-col items-center bg-surface-variant">
@@ -24,9 +25,9 @@ export default function Home() {
               intro={studio.intro}
               subIntro={studio.subIntro}
               signoff={studio.signoff}
-              designerFirstName={studio.designer.name.split(" ")[0]}
+              signoffName={studio.signoffName}
             />
-            <WorkProjects projects={projects} />
+            <WorkProjects projects={visibleProjects} />
             <About
               capabilities={studio.capabilities}
               images={studio.capabilityImages}

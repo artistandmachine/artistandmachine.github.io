@@ -3,14 +3,16 @@
 import { useRef, useState } from "react";
 import { motion, useScroll } from "framer-motion";
 import ProjectTile, { Project, ProjectTileVariant } from "./ProjectTile";
+import ProjectSlideshow from "./ProjectSlideshow";
 import ViewToggle from "./ViewToggle";
 import { getLenis } from "./SmoothScroll";
 import { useMinWidth } from "@/lib/useMinWidth";
+import { tune } from "@/lib/tune";
 
 // Buffer matching the sticky nav, so a view switch lands #s-work exactly
 // where the section is considered "started" (mirrors the offsets on the
 // section's own scroll-progress tracker and Nav's jump-links).
-const WORK_SCROLL_BUFFER = 80;
+const WORK_SCROLL_BUFFER = tune.scroll.sectionBuffer;
 
 export default function WorkProjects({ projects }: { projects: Project[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
@@ -25,6 +27,9 @@ export default function WorkProjects({ projects }: { projects: Project[] }) {
   const canToggle = useMinWidth(1280);
   const [listWanted, setListWanted] = useState(true);
   const view: ProjectTileVariant = canToggle && listWanted ? "list" : "grid";
+
+  // The project whose slideshow overlay is open, if any.
+  const [openProject, setOpenProject] = useState<Project | null>(null);
 
   /* Switching view can shift a lot of layout above the fold, so jump the
      reader back to the top of Work rather than leaving them mid-section
@@ -72,17 +77,22 @@ export default function WorkProjects({ projects }: { projects: Project[] }) {
         {/* One block per year: a sticky year label on the left, project
             tiles on the right */}
         <div id="work-years" className="flex min-w-0 flex-1 flex-col items-center w-full">
-          {years.map((year) => (
+          {years.map((year, i) => (
             <YearBlock
               key={year}
               year={year}
               projects={projects.filter((p) => p.year === year)}
               view={view}
+              isFirstYear={i === 0}
+              onOpen={setOpenProject}
             />
           ))}
         </div>
       </div>
       <div className="spacer-2" />
+      {openProject && (
+        <ProjectSlideshow project={openProject} onClose={() => setOpenProject(null)} />
+      )}
     </section>
   );
 }
@@ -91,10 +101,16 @@ function YearBlock({
   year,
   projects,
   view,
+  isFirstYear = false,
+  onOpen,
 }: {
   year: number;
   projects: Project[];
   view: ProjectTileVariant;
+  /** True for the first year block rendered — its first tile is the
+   * page's LCP candidate and gets priority loading. */
+  isFirstYear?: boolean;
+  onOpen: (project: Project) => void;
 }) {
   return (
     <div id={`work-${year}`} className="flex w-full flex-col sm:flex-row items-start">
@@ -122,8 +138,14 @@ function YearBlock({
                 "grid w-full grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3"
           }
         >
-          {projects.map((project) => (
-            <ProjectTile key={project.id} project={project} variant={view} />
+          {projects.map((project, i) => (
+            <ProjectTile
+              key={project.id}
+              project={project}
+              variant={view}
+              priority={isFirstYear && i === 0}
+              onOpen={() => onOpen(project)}
+            />
           ))}
         </div>
       </div>

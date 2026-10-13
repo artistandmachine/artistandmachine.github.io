@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "tokens": "node scripts/build-tokens.mjs",
-    "predev": "npm run tokens",
-    "prebuild": "npm run tokens",
+    "depth": "node scripts/build-depth.mjs",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -21,13 +19,13 @@
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
+    "@huggingface/transformers": "^4.3.1",
     "@types/node": "^20.14.9",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
-    "gh-pages": "^6.3.0",
+    "gh-pages": "^6.1.1",
     "postcss": "^8.4.39",
-    "style-dictionary": "^5.5.2",
     "typescript": "^5.5.3"
   },
   "allowScripts": {
