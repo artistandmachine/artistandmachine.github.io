@@ -14,8 +14,8 @@
 }
 
 /* ---- 2. Light + dark -----------------------------------------
-   Light is the default. The site ships dark (layout.tsx renders
-   data-theme="dark" on <html>); ThemeToggle removes it for light.
+   Light is the default, and the site ships light. ThemeToggle adds
+   data-theme="dark" on <html> for visitors who pick dark.
    It never follows the OS setting.
    Use as Tailwind classes: bg-surface, text-on-surface, bg-bar, ... */
 @theme static {
@@ -27,8 +27,8 @@
   --color-on-primary-container: var(--color-white); /* text on those bands */
   --color-border: #70665c4d; /* section progress bar track */
   --color-on-border: var(--color-black); /* section progress bar fill */
-  --color-bar: var(--color-black); /* nav page-load bar track */
-  --color-on-bar: var(--brand-tertiary); /* nav page-load bar fill */
+  --color-bar: var(--color-black); /* top scroll-progress bar track (white in dark, below) */
+  --color-on-bar: var(--brand-primary); /* top scroll-progress bar fill, lavender (both themes) */
   --color-accent: var(--brand-primary); /* links, highlights */
   --color-skeleton-fill: var(--color-neutral-100); /* media placeholder (same in both themes) */
 }
@@ -41,8 +41,7 @@
     --color-on-surface-variant: #a89f91; /* 5.8:1 on #1a1a1a (AA) */
     --color-border: var(--brand-tertiary);
     --color-on-border: var(--color-white);
-    --color-bar: var(--brand-tertiary);
-    --color-on-bar: var(--color-white);
+    --color-bar: var(--color-white); /* top scroll-progress bar track */
     --color-accent: #b0a3c2; /* brand-primary is only 3.5:1 on dark; this is 7.4:1 */
   }
 }
@@ -51,12 +50,18 @@
    Satoshi is loaded in app/layout.tsx (next/font/local). */
 @theme {
   --font-sans: var(--font-satoshi), system-ui, sans-serif;
+  --font-serif: var(--font-newsreader), Georgia, serif; /* hero captions */
 }
 
 /* ---- 4. Text styles ------------------------------------------
    Every typographic treatment on the site. Typography only: colour,
    whitespace and alignment stay on each component. */
 @layer components {
+  /* Hero slide caption: serif, *asterisks* in site.json set italic runs.
+     48px on desktop, 100% leading. */
+  .text-hero-caption {
+    @apply font-serif font-light text-[30px] leading-[1] tracking-[-0.02em] md:text-[44px] lg:text-[48px];
+  }
   /* Small uppercase pinned labels: "Work", "About", "2026", "Capabilities" */
   .text-label {
     @apply text-sm font-normal uppercase leading-4 tracking-wider;

@@ -16,6 +16,18 @@ export const tune = {
     rotateMs: 4000,
     /** ms after a click before auto-rotate resumes. */
     resumeAfterClickMs: 3000,
+    /** Opening: the slideshow starts full-window (100vw x 100vh) and
+     * scales into its place in the frame while the page scrolls, over this
+     * much scroll in viewport heights. Bigger = slower settle. 0 = off. */
+    settle: 0.45,
+    /** The page frame (and the progress bar in it) starts full-width and
+     * narrows to its set width trailing the hero by this much, as a
+     * fraction of `settle`. 0 = in lockstep. */
+    frameLag: 0.25,
+    /** px the slide caption drifts AWAY from the cursor at the slide's
+     * edge, opposite the image's pull toward it (magnet.move) for a bit
+     * of depth. Rides the same spring as the image. 0 = caption holds still. */
+    captionShift: 6,
   },
 
   /** "Spatial scene" depth hover (lib/spatial.ts). strength = how far the

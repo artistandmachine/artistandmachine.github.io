@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { motion, useScroll } from "framer-motion";
+import { motion, useMotionValue, useScroll, useTransform } from "framer-motion";
 import { getLenis } from "./SmoothScroll";
 import { hideOffset, useFillerProgress } from "@/lib/useAboutEndProgress";
 import ThemeToggle from "./ThemeToggle";
 import { tune } from "@/lib/tune";
+import { settleEndPx, useSettleProgress } from "@/lib/useSettle";
 
 // Matches the 90px sticky-nav buffer sections use to decide when they've
 // "started" (see useActiveSection and the offset on each section's own
@@ -100,11 +101,45 @@ function useActiveSection(ids: string[], buffer = SECTION_SCROLL_BUFFER) {
   return active;
 }
 
+/** Page scroll progress (0..1) that only starts counting once the nav
+ * band has shrunk to its 6px strip, so the lavender fill begins at 0
+ * when the bar reaches its normal size and ends at the bottom of the page. */
+function useBarProgress() {
+  const { scrollY } = useScroll();
+  const start = useMotionValue(0);
+  const end = useMotionValue(1);
+
+  useEffect(() => {
+    const measure = () => {
+      start.set(settleEndPx(tune.hero.frameLag));
+      end.set(document.documentElement.scrollHeight - window.innerHeight);
+    };
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(document.body);
+    window.addEventListener("resize", measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", measure);
+    };
+  }, [start, end]);
+
+  return useTransform([scrollY, start, end], ([y, s, e]: number[]) =>
+    e <= s ? 0 : Math.min(1, Math.max(0, (y - s) / (e - s))),
+  );
+}
+
 export default function Nav() {
-  const { scrollYProgress } = useScroll();
+  const barProgress = useBarProgress();
   const activeSection = useActiveSection(NAV_SECTION_IDS);
   const fillerProgress = useFillerProgress();
   const logoHideOffset = hideOffset(fillerProgress);
+  // At the top of the page the progress bar is a full band behind the
+  // logo + links, so the blended nav always reads against solid colour
+  // whatever image/video is underneath; it shrinks back to its 6px strip
+  // as the page frame settles (same timing as PageFrame).
+  const bandOpen = useTransform(useSettleProgress(tune.hero.frameLag), (v) => 1 - v);
+  const bandHeight = useTransform(bandOpen, (v) => `calc(0.375rem + var(--nav-h) * ${v})`);
 
   // nav-dev: the progress bar is a SIBLING of #nav, not a child — it has
   // to sit outside #nav's stacking context for it to escape the blend
@@ -114,13 +149,18 @@ export default function Nav() {
   //   #nav          — sticky top-1.5 (right below it), mix-blend-exclusion
   // Stacked flush, same total height as before. White ink under
   // exclusion: over a dark backdrop it reads white, over light, dark.
+  // The bar holds 6px in the flow; its visible band grows down behind
+  // #nav (z-45: under the nav's z-50, over the hero layer's z-40).
+  // --nav-h matches #nav-bar's h-16 / sm:h-19.
   return (
     <>
-      <div id="nav-progress" className="sticky top-0 z-[51] h-1.5 w-full bg-bar">
-        <motion.div
-          className="h-full origin-left bg-on-bar"
-          style={{ scaleX: scrollYProgress }}
-        />
+      <div id="nav-progress" className="sticky top-0 z-[45] h-1.5 w-full [--nav-h:4rem] sm:[--nav-h:4.75rem]">
+        <motion.div className="absolute inset-x-0 top-0 bg-bar" style={{ height: bandHeight }}>
+          <motion.div
+            className="h-full origin-left bg-on-bar"
+            style={{ scaleX: barProgress }}
+          />
+        </motion.div>
       </div>
       <header
         id="nav"

@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Script from "next/script";
 import localFont from "next/font/local";
+import { Newsreader } from "next/font/google";
 import SmoothScroll from "@/components/SmoothScroll";
 import { themeInitScript } from "@/components/ThemeToggle";
 import "./globals.css";
 
-// Satoshi, the studio's single type family, used for both UI copy and
-// editorial headlines (mapped to font-sans in app/theme.css).
+// Satoshi, the studio's main type family, used for UI copy (mapped to
+// font-sans in app/theme.css). Newsreader is the serif for the hero
+// captions (font-serif).
 const satoshi = localFont({
   src: [
     { path: "../public/fonts/Satoshi-Light.woff2", weight: "300", style: "normal" },
@@ -14,6 +16,14 @@ const satoshi = localFont({
     { path: "../public/fonts/Satoshi-Medium.woff2", weight: "500", style: "normal" },
   ],
   variable: "--font-satoshi",
+  display: "swap",
+});
+
+const newsreader = Newsreader({
+  subsets: ["latin"],
+  weight: ["300"],
+  style: ["normal", "italic"],
+  variable: "--font-newsreader",
   display: "swap",
 });
 
@@ -71,15 +81,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // Dark by default; themeInitScript removes data-theme before paint for
-    // visitors who picked light, so the attribute can differ from the
+    // Light by default; themeInitScript adds data-theme="dark" before paint
+    // for visitors who picked dark, so the attribute can differ from the
     // server HTML on purpose (hence suppressHydrationWarning, scoped to
     // this element's attributes only).
-    <html lang="en" className={satoshi.variable} data-theme="dark" suppressHydrationWarning>
+    <html lang="en" className={`${satoshi.variable} ${newsreader.variable}`} suppressHydrationWarning>
       <body>
-        {/* Applies a stored light preference before first paint (Next's
+        {/* Applies a stored dark preference before first paint (Next's
             own beforeInteractive injection point, ahead of hydration) so it
-            doesn't flash dark then snap light. */}
+            doesn't flash light then snap dark. */}
         <Script id="theme-init" strategy="beforeInteractive">
           {themeInitScript}
         </Script>
