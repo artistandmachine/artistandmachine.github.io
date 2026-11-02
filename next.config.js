@@ -9,6 +9,9 @@ const nextConfig = {
     // instead (see README) to get the equivalent byte savings.
     unoptimized: true,
   },
+  experimental: {
+    agentUpgrade: "security",
+  },
 };
 
 module.exports = nextConfig;
