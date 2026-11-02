@@ -11,8 +11,8 @@
    data-theme="dark" on <html> for visitors who pick dark (section 2).
    It never follows the OS setting.
    Use as Tailwind classes: bg-surface, text-on-surface, bg-bar, ...
-   (Tailwind's @theme only takes static/inline/reference/default, not
-   light/dark, so dark lives in a plain :root block below.) */
+   (Tailwind's theme block only takes static/inline/reference/default,
+   not light/dark, so dark lives in a plain :root block below.) */
 @theme static {
   --color-brand-primary: #ad5535; /* signature accent hue */
   --color-brand-secondary: #b6b2af; /* supporting neutral tone */
