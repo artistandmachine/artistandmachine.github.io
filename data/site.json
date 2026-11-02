@@ -1,6 +1,6 @@
 {
   "studio": {
-    "name": "Studio A&M",
+    "name": "Artist & Machine™",
     "legalName": "Artist & Machine LLC",
     "location": "Beaverton, OR",
     "tagline": "Welcome.",
@@ -8,6 +8,12 @@
     "subIntro": "Equal parts creative and technical, I work closely with clients to build forward thinking and well-designed products.",
     "signoff": "Thanks for stopping by.",
     "signoffName": "Bion Porzio",
+    "sections": {
+      "intro": "Studio A&M",
+      "work": "Work",
+      "about": "About",
+      "capabilities": "Capabilities"
+    },
     "designer": {
       "name": "Bion Porzio",
       "email": "bion@artistandmachine.com",

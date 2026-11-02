@@ -14,7 +14,7 @@ import { tune } from "@/lib/tune";
 // section's own scroll-progress tracker and Nav's jump-links).
 const WORK_SCROLL_BUFFER = tune.scroll.sectionBuffer;
 
-export default function WorkProjects({ projects }: { projects: Project[] }) {
+export default function WorkProjects({ title, projects }: { title: string; projects: Project[] }) {
   const sectionRef = useRef<HTMLDivElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -67,7 +67,7 @@ export default function WorkProjects({ projects }: { projects: Project[] }) {
         <div id="work-rail" className="hidden sm:flex w-12 md:w-19.25 shrink-0 flex-col items-center self-stretch py-12 md:py-22.5">
           <div className="spacer-1 w-full shrink-0" />
           <div className="sticky top-22.5 flex flex-col items-center gap-2.5">
-            <h2 className="text-label whitespace-nowrap text-on-surface">Work</h2>
+            <h2 className="text-label whitespace-nowrap text-on-surface">{title}</h2>
             {canToggle && (
               <ViewToggle view={view} onChange={changeView} />
             )}

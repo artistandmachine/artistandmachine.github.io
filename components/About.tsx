@@ -52,10 +52,14 @@ function useLabelHideProgress(designerColumnRef: React.RefObject<HTMLDivElement 
 }
 
 export default function About({
+  title,
+  capabilitiesTitle,
   capabilities,
   images,
   designer,
 }: {
+  title: string;
+  capabilitiesTitle: string;
   capabilities: string[];
   images: string[];
   designer: {
@@ -112,13 +116,13 @@ export default function About({
         {/* Left rail: sticky "About" label, pinned for the section's whole scroll range */}
         <div id="about-rail" className="hidden sm:flex w-12 md:w-19.25 shrink-0 flex-col items-center self-stretch">
           <div className="h-[25vh] w-full shrink-0" />
-          <StickyLabel as="h2" style={{ transform: `translateY(${labelHideY}px)` }}>About</StickyLabel>
+          <StickyLabel as="h2" style={{ transform: `translateY(${labelHideY}px)` }}>{title}</StickyLabel>
         </div>
 
         <div id="about-body" className="flex min-w-0 flex-1 flex-col items-end w-full">
           <div className="h-[25vh] sm:h-[50vh] w-full shrink-0" />
           <div className="sm:hidden w-full pb-4">
-            <span className="text-label text-on-surface">About</span>
+            <span className="text-label text-on-surface">{title}</span>
           </div>
           {/* blockCapabilities: sticky "Capabilities" label on the left,
               capability text column, capability image column */}
@@ -131,7 +135,7 @@ export default function About({
                   the first tile. At lg, lg:h-full lets it fill the
                   self-stretch height matched to the sibling column. */}
               <div className="relative w-full h-2 sm:h-[calc(25vh-24px)] lg:h-full">
-                <StickyLabel as="h3" className="w-full text-left sm:text-right lg:text-center">Capabilities</StickyLabel>
+                <StickyLabel as="h3" className="w-full text-left sm:text-right lg:text-center">{capabilitiesTitle}</StickyLabel>
               </div>
             </div>
             {/* sm/md: one interleaved column — each capability's image

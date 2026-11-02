@@ -6,43 +6,47 @@
    Copy lives in data/site.json. Motion numbers live in lib/tune.ts.
    ============================================================ */
 
-/* ---- 1. Palette ---------------------------------------------- */
-:root {
-  --brand-primary: #7c6699; /* signature accent hue */
-  --brand-secondary: #b6b2af; /* supporting neutral tone */
-  --brand-tertiary: #70665c; /* supporting neutral tone */
-}
-
-/* ---- 2. Light + dark -----------------------------------------
-   Light is the default, and the site ships light. ThemeToggle adds
-   data-theme="dark" on <html> for visitors who pick dark.
+/* ---- 1. Light theme -----------------------------------------
+   The default; the site ships light. ThemeToggle adds
+   data-theme="dark" on <html> for visitors who pick dark (section 2).
    It never follows the OS setting.
-   Use as Tailwind classes: bg-surface, text-on-surface, bg-bar, ... */
+   Use as Tailwind classes: bg-surface, text-on-surface, bg-bar, ...
+   (Tailwind's @theme only takes static/inline/reference/default, not
+   light/dark, so dark lives in a plain :root block below.) */
 @theme static {
+  --color-brand-primary: #ad5535; /* signature accent hue */
+  --color-brand-secondary: #b6b2af; /* supporting neutral tone */
+  --color-brand-tertiary: #70665c; /* supporting neutral tone */
+
   --color-surface: var(--color-white); /* page background */
   --color-on-surface: var(--color-black); /* text and icons */
-  --color-surface-variant: var(--brand-secondary); /* outer letterbox behind the content column */
-  --color-on-surface-variant: var(--brand-tertiary); /* muted text, e.g. footer divider */
+  --color-surface-variant: var(--color-brand-secondary); /* outer letterbox behind the content column */
+  --color-on-surface-variant: var(--color-brand-tertiary); /* muted text, e.g. footer divider */
   --color-primary-container: var(--color-black); /* footer and other dark bands */
   --color-on-primary-container: var(--color-white); /* text on those bands */
   --color-border: #70665c4d; /* section progress bar track */
   --color-on-border: var(--color-black); /* section progress bar fill */
   --color-bar: var(--color-black); /* top scroll-progress bar track (white in dark, below) */
-  --color-on-bar: var(--brand-primary); /* top scroll-progress bar fill, lavender (both themes) */
-  --color-accent: var(--brand-primary); /* links, highlights */
+  --color-on-bar: var(--color-brand-primary); /* top scroll-progress bar fill */
+  --color-accent: var(--color-brand-primary); /* links, highlights */
   --color-skeleton-fill: var(--color-neutral-100); /* media placeholder (same in both themes) */
 }
 
+/* ---- 2. Dark theme ------------------------------------------
+   Brand colours brightened (same hue and saturation) to AAA, 7:1+
+   on the #1a1a1a surface. Anything not listed keeps its light value. */
 @layer base {
   :root[data-theme="dark"] {
+    --color-brand-primary: #d7957d; /* 7.0:1 (light #ad5535 is 3.4:1 here) */
+    --color-brand-secondary: #b6b2af; /* 8.3:1, already AAA */
+    --color-brand-tertiary: #aca39a; /* 7.0:1 (light #70665c is 3.1:1 here) */
+
     --color-surface: #1a1a1a;
     --color-on-surface: var(--color-white);
     --color-surface-variant: var(--color-neutral-800);
-    --color-on-surface-variant: #a89f91; /* 5.8:1 on #1a1a1a (AA) */
-    --color-border: var(--brand-tertiary);
+    --color-border: #70665c; /* light brand-tertiary, kept dim for the track */
     --color-on-border: var(--color-white);
     --color-bar: var(--color-white); /* top scroll-progress bar track */
-    --color-accent: #b0a3c2; /* brand-primary is only 3.5:1 on dark; this is 7.4:1 */
   }
 }
 

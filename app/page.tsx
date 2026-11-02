@@ -16,19 +16,22 @@ export default function Home() {
   return (
     <main id="main-home" className="relative flex w-full flex-col items-center bg-surface-variant">
       <PageFrame>
-        <Nav />
+        <Nav sections={studio.sections} />
         <Hero images={studio.heroImages} captions={studio.heroCaptions} />
         <div id="page-content" className="relative flex w-full flex-col items-center">
           <ProgressMask />
           <Intro
+            title={studio.sections.intro}
             tagline={studio.tagline}
             intro={studio.intro}
             subIntro={studio.subIntro}
             signoff={studio.signoff}
             signoffName={studio.signoffName}
           />
-          <WorkProjects projects={visibleProjects} />
+          <WorkProjects title={studio.sections.work} projects={visibleProjects} />
           <About
+            title={studio.sections.about}
+            capabilitiesTitle={studio.sections.capabilities}
             capabilities={studio.capabilities}
             images={studio.capabilityImages}
             designer={studio.designer}

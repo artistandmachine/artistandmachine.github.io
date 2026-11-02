@@ -27,13 +27,8 @@ function useSettle(slot: React.RefObject<HTMLDivElement | null>) {
   const slotH = useMotionValue(0);
   const vw = useMotionValue(0);
   const vh = useMotionValue(0);
-  // Bottom edge of the nav band at the top of the page (the progress bar
-  // opened up behind #nav, see Nav.tsx). The layer starts below it so the
-  // band never covers the image, and rides up as the band shrinks.
-  const band = useMotionValue(0);
   const [measured, setMeasured] = useState(false);
   const settled = useSettleProgress();
-  const bandSettled = useSettleProgress(tune.hero.frameLag); // same timing as the band
 
   useEffect(() => {
     const el = slot.current;
@@ -46,8 +41,6 @@ function useSettle(slot: React.RefObject<HTMLDivElement | null>) {
       slotH.set(r.height);
       vw.set(document.documentElement.clientWidth);
       vh.set(window.innerHeight);
-      // #nav is sticky, so its bottom is the band's full height at any scroll.
-      band.set(document.getElementById("nav")?.getBoundingClientRect().bottom ?? 0);
       setMeasured(true);
     };
     measure();
@@ -58,14 +51,12 @@ function useSettle(slot: React.RefObject<HTMLDivElement | null>) {
       ro.disconnect();
       window.removeEventListener("resize", measure);
     };
-  }, [slot, slotLeft, slotTop, slotW, slotH, vw, vh, band]);
+  }, [slot, slotLeft, slotTop, slotW, slotH, vw, vh]);
 
   const left = useTransform([settled, slotLeft], ([p, l]: number[]) => lerp(-l, 0, p));
-  const top = useTransform([settled, slotTop, bandSettled, band], ([p, t, q, b]: number[]) =>
-    lerp(-t, 0, p) + b * (1 - q),
-  );
+  const top = useTransform([settled, slotTop], ([p, t]: number[]) => lerp(-t, 0, p));
   const width = useTransform([settled, slotW, vw], ([p, w, v]: number[]) => lerp(v, w, p));
-  const height = useTransform([settled, slotH, vh, band], ([p, h, v, b]: number[]) => lerp(v - b, h, p));
+  const height = useTransform([settled, slotH, vh], ([p, h, v]: number[]) => lerp(v, h, p));
 
   return { style: { left, top, width, height }, settled, measured };
 }
@@ -194,13 +185,13 @@ export default function Hero({ images, captions = [] }: { images: string[]; capt
       {/* The slot holds the hero's resting place in the frame; the carousel
           layer inside starts full-window and settles into it (useSettle).
           The negative top margin pulls it up under the sticky progress bar
-          + nav (h-1.5 + h-16 / sm:h-19 in Nav.tsx) so it sits flush with the
+          + nav (h-1.5 + h-[3.625rem] in Nav.tsx = 64px) so it sits flush with the
           top of the page: only the sides scale in, never a top gap. */}
-      <div id="hero-slot" ref={slotRef} className="relative -mt-[70px] aspect-1104/621 w-full sm:-mt-[82px]">
+      <div id="hero-slot" ref={slotRef} className="relative -mt-16 aspect-1104/621 w-full">
         <motion.div
           id="hero-carousel"
           ref={magnet.ref}
-          className={`${settle.measured ? "absolute" : "fixed inset-x-0 bottom-0 top-[70px] sm:top-[82px]"} z-40`}
+          className={`${settle.measured ? "absolute" : "fixed inset-0"} z-40`}
           style={settle.measured ? settle.style : undefined}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}

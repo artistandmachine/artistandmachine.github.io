@@ -30,6 +30,15 @@ export const tune = {
     captionShift: 6,
   },
 
+  nav: {
+    /** Opacity of the black band behind the nav logo + links at the top of
+     * the page. It holds this while condensing, then fades to 1 the moment
+     * it becomes the 6px progress bar (and back when it reopens). */
+    bandOpacity: 0.8,
+    /** ms for that fade. */
+    bandFadeMs: 400,
+  },
+
   /** "Spatial scene" depth hover (lib/spatial.ts). strength = how far the
    * scene shifts at the edge (fraction of the image); focus = the depth
    * that stays still (0 farthest, 1 nearest). */

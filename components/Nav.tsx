@@ -102,7 +102,7 @@ function useActiveSection(ids: string[], buffer = SECTION_SCROLL_BUFFER) {
 }
 
 /** Page scroll progress (0..1) that only starts counting once the nav
- * band has shrunk to its 6px strip, so the lavender fill begins at 0
+ * band has shrunk to its 6px strip, so the brand-primary fill begins at 0
  * when the bar reaches its normal size and ends at the bottom of the page. */
 function useBarProgress() {
   const { scrollY } = useScroll();
@@ -129,7 +129,7 @@ function useBarProgress() {
   );
 }
 
-export default function Nav() {
+export default function Nav({ sections }: { sections: { work: string; about: string } }) {
   const barProgress = useBarProgress();
   const activeSection = useActiveSection(NAV_SECTION_IDS);
   const fillerProgress = useFillerProgress();
@@ -138,8 +138,13 @@ export default function Nav() {
   // logo + links, so the blended nav always reads against solid colour
   // whatever image/video is underneath; it shrinks back to its 6px strip
   // as the page frame settles (same timing as PageFrame).
-  const bandOpen = useTransform(useSettleProgress(tune.hero.frameLag), (v) => 1 - v);
-  const bandHeight = useTransform(bandOpen, (v) => `calc(0.375rem + var(--nav-h) * ${v})`);
+  const bandSettled = useSettleProgress(tune.hero.frameLag);
+  const bandHeight = useTransform(bandSettled, (v) => `calc(0.375rem + var(--nav-h) * ${1 - v})`);
+  const [condensed, setCondensed] = useState(false);
+  useEffect(() => {
+    setCondensed(bandSettled.get() >= 1);
+    return bandSettled.on("change", (v) => setCondensed(v >= 1));
+  }, [bandSettled]);
 
   // nav-dev: the progress bar is a SIBLING of #nav, not a child — it has
   // to sit outside #nav's stacking context for it to escape the blend
@@ -151,11 +156,18 @@ export default function Nav() {
   // exclusion: over a dark backdrop it reads white, over light, dark.
   // The bar holds 6px in the flow; its visible band grows down behind
   // #nav (z-45: under the nav's z-50, over the hero layer's z-40).
-  // --nav-h matches #nav-bar's h-16 / sm:h-19.
+  // --nav-h is #nav-bar's height: 6px strip + 58px = a 64px (4rem) band.
   return (
     <>
-      <div id="nav-progress" className="sticky top-0 z-[45] h-1.5 w-full [--nav-h:4rem] sm:[--nav-h:4.75rem]">
-        <motion.div className="absolute inset-x-0 top-0 bg-bar" style={{ height: bandHeight }}>
+      <div id="nav-progress" className="sticky top-0 z-[45] h-1.5 w-full [--nav-h:3.625rem]">
+        <motion.div
+          className="absolute inset-x-0 top-0 bg-bar transition-opacity ease-out"
+          style={{
+            height: bandHeight,
+            opacity: condensed ? 1 : tune.nav.bandOpacity,
+            transitionDuration: `${tune.nav.bandFadeMs}ms`,
+          }}
+        >
           <motion.div
             className="h-full origin-left bg-on-bar"
             style={{ scaleX: barProgress }}
@@ -166,7 +178,7 @@ export default function Nav() {
         id="nav"
         className="sticky top-1.5 z-50 flex w-full flex-col items-center mix-blend-exclusion text-white [&_*]:text-white"
       >
-        <div id="nav-bar" className="relative flex h-16 sm:h-19 w-full items-center justify-between px-4 md:px-10 lg:px-14">
+        <div id="nav-bar" className="relative flex h-[3.625rem] w-full items-center justify-between px-4 md:px-10 lg:px-14">
           <div id="nav-logo" className="flex items-center justify-center">
             <a
               href="#main-home"
@@ -209,10 +221,10 @@ export default function Nav() {
           <nav id="nav-links" className="flex items-center justify-end gap-3 sm:gap-5">
             <ThemeToggle />
             <NavLink href="#s-work" active={activeSection === "#s-work"}>
-              Work
+              {sections.work}
             </NavLink>
             <NavLink href="#s-about" active={activeSection === "#s-about"}>
-              About
+              {sections.about}
             </NavLink>
           </nav>
         </div>
